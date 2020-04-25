@@ -1,0 +1,40 @@
+{
+  "name": "fe-error-sourcemap",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "npm run start",
+    "debug": "node --inspect --inspect-brk ./bin/www",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build && npm run uplaodSourceMap ",
+    "lint": "vue-cli-service lint",
+    "uplaodSourceMap": "node ./fe-view/build/upload_sourcemap.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cookie-parser": "~1.4.4",
+    "core-js": "^2.6.5",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
+    "raven-js": "^3.27.2",
+    "source-map": "^0.7.3",
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.12.0",
+    "@vue/cli-plugin-eslint": "^3.12.0",
+    "@vue/cli-service": "^3.12.0",
+    "@vue/eslint-config-prettier": "^5.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "prettier": "^1.18.2",
+    "vue-template-compiler": "^2.6.10"
+  }
+}
