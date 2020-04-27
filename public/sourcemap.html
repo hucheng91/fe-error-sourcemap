@@ -1,0 +1,276 @@
+<!--
+ * @Author: hucheng
+ * @Date: 2020-04-25 23:44:49
+ * @Description: here is des
+ -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge">
+        <meta name=viewport content="width=device-width,initial-scale=1">
+        <title>Vue App</title>
+        <link rel="stylesheet" href="https://unpkg.zhimg.com/element-ui/lib/theme-chalk/index.css">
+        <style >
+            .error-red-line-top {
+                background: #fff0f0;
+                border-top: 1px solid #ffd6d6;
+                border-bottom: 1px solid #ffd6d6;
+                color: red;
+                font-size: 14px;
+            }
+            .error-red-line-top  .error-red-line-tilte {
+                display: flex;
+                justify-content: space-between;
+                padding-right: 20px;
+                padding-left: 20px;
+            }
+
+            .red-line-left {
+                width: 80%;
+                word-break: break-all;
+            }
+            .red-line-right {
+                width: 20%;
+                word-break: break-all;
+            }    
+            .error-red-line-content {
+                padding-right: 20px;
+                padding-left: 60px;
+            }    
+            .code-line-number {
+                padding-right: 5px;
+            }
+            .code-line {
+                padding: 0px;
+                height: 20px;
+            }
+            .hight-line {
+                background-color: #ffadad;
+            }
+            .messge-row {
+                padding: 10px;
+                margin: 5px;
+                border: 1px solid #dddddd;
+            }
+            
+            .detailToGitLab {
+                float: right;
+                margin-right: 10px;
+                color: #716aca;
+            }
+            
+            .detailToGitLab:hover {
+                text-decoration: underline;
+            }
+            
+            .error-detail-container .el-tabs__item {
+                height: 35px;
+                line-height: 34px;
+            }
+            
+            .el-tabs--border-card > .el-tabs__header .el-tabs__item {
+                color: #fff;
+                border-bottom: 0;
+            }
+            
+            .el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+                color: #716aca;
+                font-weight: bold;
+            }
+            
+            .el-tabs__item:hover {
+                color: #716aca !important;
+            }
+            
+            .error-detail-container .el-tabs--border-card {
+                border: 0;
+            }
+            
+            .el-collapse-item__header.is-active {
+                font-weight: bold;
+            }
+            .el-tabs--border-card > .el-tabs__header {
+                background: #3d3b56;
+            }
+            </style>
+    </head>
+    <body>
+        <div id=app>
+            <el-row>
+                <div class="error-detail-container" v-loading="loading">
+                    <el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
+                        <el-tab-pane label="sourcemap" name="second">
+                            <div class="error-red-content">
+                                <div class="error-red-line-top">
+                                    <div class="error-red-line-tilte">
+                                        <div class="red-line-left">
+                                            <span>Uncaught {{ stack.type }}:</span>
+                                            <span>{{ stack.value }}</span>
+                                        </div>
+                                        <div class="red-line-right">
+                                            <a @click="showErrorLine(0)">{{ stack.fristUrl }}</a>
+                                        </div>
+                                    </div>
+                                    <div class="error-red-line-content" v-if="stack.stacktrace">
+                                        <div v-for="(item, index) in stack.stacktrace.frames" :key="index">
+                                            <p>
+                                                <span>at {{ item.function }}</span>
+                                                <a @click="showErrorLine(index)" style="color: #4a4a4a;"
+                                                    >( {{ item.fileUrl }} {{ item.lineno }}:{{ item.colno }} )</a
+                                                >
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error-source-map-content">
+                                    <el-collapse v-model="activeSourceLine">
+                                        <el-collapse-item v-for="(item, i) in codeArray" :key="i" :name="i">
+                                            <template slot="title">
+                                                <div style="padding: 0px 20px;">
+                                                    <span>{{ item.fileName }}</span>
+                                                    <i class="header-icon el-icon-info"></i>
+                                                </div>
+                                            </template>
+                                            <div>
+                                                <code id="errCode">
+                                                    <div class="code-line" v-for="(code, line) in item.codeArray" :key="line">
+                                                        <pre :class="{ 'hight-line': code.heightlight }">{{
+                                                            code.line + '.  ' + code.messgage
+                                                        }}</pre>
+                                                        <a
+                                                            class="detailToGitLab"
+                                                            v-if="
+                                                                code.heightlight &&
+                                                                    gitUrl &&
+                                                                    item.fileName.indexOf('node_modules') === -1
+                                                            "
+                                                            :href="
+                                                                gitUrl +
+                                                                    '/blob/master/' +
+                                                                    item.fileName.replace('webpack:///', '') +
+                                                                    '#L' +
+                                                                    code.line
+                                                            "
+                                                            target="_blank"
+                                                            >点击查看gitlab源码</a
+                                                        >
+                                                    </div>
+                                                </code>
+                                            </div>
+                                        </el-collapse-item>
+                                    </el-collapse>
+                                </div>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+              </el-row>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+        <script src="https://unpkg.zhimg.com/element-ui/lib/index.js"></script>
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    loading: true,
+                    activeSourceLine: ['0'],
+                    activeName: 'second',
+                    stack: { stacktrace: { frames: [] } },
+                    codeArray: [],
+                    sourcemap: [],
+                    baseInfo: {},
+                    gitUrl: null,
+                    gitUrlCacheHash: new Map()
+                },
+                mounted(){
+                    this.init();
+                },
+                methods: {
+                    handleClick(){
+                        console.log(123)
+                    },
+                    init () {
+                        axios.get("/sourcemap/listErrorMessage").then(res => {
+                            if(!res.data || res.data.length === 0){
+                                this.$message.error('执行 npm run serve，浏览器打开8080端口上报个错误，回来刷新下');
+                                return ;
+                            }
+                            let stack = this.initStackList(res.data[0]);
+                            this.stack = stack;
+                            this.loading = false;
+                            this.getSourceMapByMsg(res.data[0].msg);
+                        })
+                        
+                        // if (this.$route.query.nosourcemap !== '1') {
+                        //     this.getSourceMapByMsg(stack);
+                        // } else {
+                        //     this.loading = false;
+                        // }
+
+                        
+                    },
+                    initStackList (errorDetail) {
+                        if (!errorDetail.stack || errorDetail.stack === 'null') {
+                            return [];
+                        }
+                        let data = {};
+                        try {
+                            data = errorDetail.stack.exception.values[0];
+                        } catch (error) {
+                            data = errorDetail.stack.values[0];
+                        }
+                        data.stacktrace.frames.reverse();
+                        let getFileUrl = ele => {
+                            ele.fileUrl = ele.filename.split('/').pop();
+                        };
+                        let reduceFrames = (acm, ele) => {
+                            acm.push(ele);
+                            return acm;
+                        };
+                        data.stacktrace.frames.map(getFileUrl);
+                        data.stacktrace.frames = data.stacktrace.frames.reduce(reduceFrames, []);
+                        data.fristUrl = data.stacktrace.frames[0].fileUrl;
+                        data.projectId = errorDetail.projectId;
+                        return data;
+                    },
+                    async getSourceMapByMsg (msg) {
+                        let res = await axios.get(`/sourcemap/detailError?msg=${msg}`).then(res => res.data)
+
+                        let dataArray = [];
+                        res.forEach(element => {
+                            let ele = {
+                                fileName: element.source,
+                                codeArray: []
+                            };
+
+                            if (element.sourcesContent) {
+                                let lines = element.sourcesContent.split('\n');
+                                let start = element.line > 5 ? element.line - 5 : element.line;
+                                let data = lines.slice(start, element.line + 5);
+                                data.forEach((e, i) => {
+                                    let line = {
+                                        line: start + i + 1,
+                                        messgage: e,
+                                        heightlight: i + 1 === 5
+                                    };
+                                    ele.codeArray.push(line);
+                                });
+                                dataArray.push(ele);
+                            }
+                        });
+
+                        console.log('---------------------------------------');
+                        console.log(res.data);
+                        this.codeArray = dataArray.reverse();
+                        this.loading = false;
+                    },
+                    showErrorLine (line) {
+                        console.log(111)
+                        this.activeSourceLine = [line];
+                    },
+                }
+            })
+        </script>
+    </body>
+</html>

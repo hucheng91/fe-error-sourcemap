@@ -15,17 +15,17 @@ const map = new Map();
 router.post('/reportErrorMessage', function(req, res, next) {
     const {msg,stack} = req.body;
     if(!map.has(msg)){
-        map.set(msg,stack);
+        map.set(msg,req.body);
 }
     res.send('respond with a resource');
 });
 router.get('/listErrorMessage', function(req, res, next) {
-    res.send(map);
+    res.send([...map.values()]);
 });
 router.get('/detailError', async function(req, res, next) {
     const {msg} = req.query; 
     const errInfo = map.get(msg);
-    const sourceMapArray = errInfo.exception.values[0].stacktrace.frames;
+    const sourceMapArray = errInfo.stack.exception.values[0].stacktrace.frames;
     const getSourceMapFn = (element) => {
         let filePath = url.parse(element.filename).pathname;
         const fileName = path.basename(filePath);
