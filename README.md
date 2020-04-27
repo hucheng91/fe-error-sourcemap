@@ -15,7 +15,7 @@
 
 - npm i
 - npm run build
-- cd fe-view/dist  && http-server -p 8080 or live-server -p 8080 ( or other static server,if not http-server, you need npm i http-server -g or npm i -g live-server)
+- cd fe-view/dist  && http-server -p 8080 or live-server -p 8080 ( or other static server,if use http-server, you need npm i http-server -g or npm i -g live-server)
 - npm run dev 
 - open http://localhost:8080/,
 - open http://localhost:3000/sourcemap.html 
