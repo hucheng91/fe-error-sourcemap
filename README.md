@@ -5,6 +5,9 @@
  -->
 # vue source-map demo
 
+[生产环境通过SourceMap还原压缩后JavaScript错误，快速定位异常](https://zhuanlan.zhihu.com/p/64033141)
+[前端错误监控之SourceMap还原Vue Demo 实现](https://zhuanlan.zhihu.com/p/136840107)
+[前端错误监控之用户行为回放](https://zhuanlan.zhihu.com/p/136840753)
 
 实际效果
 
