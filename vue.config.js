@@ -12,7 +12,7 @@ module.exports = {
         entry: './fe-view/src/main.js',
         plugins: [
             new HtmlWebpackPlugin({
-              template: path.resolve(__dirname, './public/fe-view.html'),
+              template: path.resolve(__dirname, './fe-view/public/index.html'),
             }),
           ],
     }
